@@ -3,6 +3,7 @@ import { EventFormProps } from "../types";
 import { TextField, Alert } from "@mui/material";
 import { TimeSelect } from "./TimeSelect";
 import { Button } from "./Button";
+import moment from "moment";
 const EventForm = ({
   selectedEvent,
   onAdd,
@@ -15,6 +16,7 @@ const EventForm = ({
   setEnd,
   name,
   setName,
+  currentDate,
 }: EventFormProps) => {
   const [errors, setErrors] = useState<{
     emptyFieldError: string;
@@ -27,8 +29,8 @@ const EventForm = ({
   useEffect(() => {
     if (selectedEvent) {
       setName(selectedEvent.name);
-      setStart(selectedEvent.start);
-      setEnd(selectedEvent.end);
+      setStart(moment(selectedEvent.start).hour());
+      setEnd(moment(selectedEvent.end).hour());
     } else {
       setName("");
       setStart("");
@@ -40,7 +42,7 @@ const EventForm = ({
     const newErrors = { emptyFieldError: "", timeError: "" };
     let valid = true;
 
-    if (name === "" || !start || !end) {
+    if (name === "" || start === "" || end === "") {
       newErrors.emptyFieldError = "All fields are required";
       valid = false;
     }
@@ -54,17 +56,30 @@ const EventForm = ({
   };
 
   const handleSubmit = () => {
-    if (!isValid()) return null;
+    if (!isValid()) return;
+
+    const formattedStart = moment(currentDate)
+      .hour(Number(start))
+      .minute(0)
+      .format();
+    const formattedEnd = moment(currentDate)
+      .hour(Number(end))
+      .minute(0)
+      .format();
+
+    const eventData = {
+      id: selectedEvent ? selectedEvent.id : Date.now(),
+      name,
+      start: formattedStart,
+      end: formattedEnd,
+    };
+
     if (selectedEvent === null) {
-      onAdd({ id: Date.now(), name, start: Number(start), end: Number(end) });
+      onAdd(eventData);
     } else {
-      onUpdate({
-        id: selectedEvent?.id,
-        name,
-        start: Number(start),
-        end: Number(end),
-      });
+      onUpdate(eventData);
     }
+
     onClear();
   };
 
@@ -74,7 +89,6 @@ const EventForm = ({
       onClear();
     }
   };
-
   return (
     <div className="flex flex-col items-center p-[20px] bg-gray-200	mb-[20px] w-full">
       <TextField

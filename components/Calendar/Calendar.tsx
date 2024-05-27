@@ -3,7 +3,8 @@ import React, { useCallback, useMemo, useReducer, useState } from "react";
 import { EventAction, EventState, TEvent } from "./types";
 import Event from "./Event/Event";
 import EventForm from "./EventForm/EventForm";
-import moment from "moment-timezone";
+import moment, { Moment } from "moment-timezone";
+import DateSelector from "./DateSelector";
 
 const initialState = { events: [], selectedEvent: null };
 
@@ -37,6 +38,7 @@ const Calendar = () => {
   const [start, setStart] = useState<number | string>("");
   const [end, setEnd] = useState<number | string>("");
   const [name, setName] = useState<string>("");
+  const [currentDate, setCurrentDate] = useState<Moment>(moment());
 
   // Function to handle adding a new event
   const addEvent = (newEvent: TEvent) => {
@@ -78,20 +80,45 @@ const Calendar = () => {
   // Filters overlapping events based on start and end times
   const getOverlappingEvents = useCallback(
     (start: number, end: number) => {
-      return state.events.filter(
-        (event) => event.start < end && event.end > start
-      );
+      return state.events.filter((event) => {
+        const eventStartHour = moment(event.start).hour();
+        const eventEndHour = moment(event.end).hour();
+
+        // Check if the event overlaps with the specified time range and day
+        if (
+          currentDate.isSame(event.start, "day") &&
+          eventStartHour < end &&
+          eventEndHour > start
+        ) {
+          return true;
+        }
+
+        return false;
+      });
     },
-    [state.events]
+    [state.events, currentDate]
   );
 
   // Renders events for each hour
   const renderEvents = useCallback(
-    (i: number) => {
+    (hour: number) => {
+      const currentMoment = moment(currentDate);
       return state.events.map((event) => {
-        if (event.start !== i) return null;
+        const eventStartTime = moment(event.start);
+        const eventEndTime = moment(event.end);
 
-        const overlappingEvents = getOverlappingEvents(event.start, event.end);
+        // Check if the event matches the current hour and date
+        if (
+          eventStartTime.hour() !== hour ||
+          !currentMoment.isSame(eventStartTime, "day")
+        ) {
+          return null;
+        }
+
+        const overlappingEvents = getOverlappingEvents(
+          eventStartTime.hour(),
+          eventEndTime.hour()
+        );
         const total = overlappingEvents.length;
         const offset = overlappingEvents.findIndex((e) => e.id === event.id);
 
@@ -107,7 +134,7 @@ const Calendar = () => {
         );
       });
     },
-    [getOverlappingEvents, state.events, dispatch]
+    [getOverlappingEvents, state.events, dispatch, currentDate]
   );
 
   // Renders the 24-hour grid
@@ -129,7 +156,13 @@ const Calendar = () => {
 
   return (
     <div>
-      <h1 className="mb-5">{moment().format("LL")}</h1>
+      <h1 className="mb-5">
+        <DateSelector
+          currentDate={currentDate}
+          onDateChange={setCurrentDate}
+          onClear={clearEvent}
+        />
+      </h1>
       <EventForm
         selectedEvent={state.selectedEvent}
         onAdd={addEvent}
@@ -142,6 +175,7 @@ const Calendar = () => {
         setEnd={setEnd}
         name={name}
         setName={setName}
+        currentDate={currentDate}
       />
       <div className="flex flex-col	min-w-full">{hours}</div>
     </div>

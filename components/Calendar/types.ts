@@ -1,11 +1,12 @@
+import { Moment } from "moment-timezone";
 import { Dispatch, SetStateAction } from "react";
 
 export type TEvent = {
   id: number;
   name: string;
   // If I had connected to backed end would of used real datetimes but for time saving did it this way.
-  start: number;
-  end: number;
+  start: string;
+  end: string;
 };
 
 export type EventFormProps = {
@@ -20,6 +21,7 @@ export type EventFormProps = {
   setEnd: Dispatch<SetStateAction<number | string>>;
   name: string;
   setName: Dispatch<SetStateAction<string>>;
+  currentDate: Moment;
 };
 
 export type EventProps = {
@@ -40,3 +42,9 @@ export type EventAction =
   | { type: "DELETE_EVENT"; payload: number }
   | { type: "SELECT_EVENT"; payload: TEvent }
   | { type: "CLEAR_EVENT" };
+
+export type DateSelectorProps = {
+  currentDate: Moment;
+  onDateChange: (date: Moment) => void;
+  onClear: () => void;
+};
