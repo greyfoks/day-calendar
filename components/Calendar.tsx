@@ -1,5 +1,5 @@
 "use client";
-import React, { useReducer, useState } from "react";
+import React, { useCallback, useMemo, useReducer, useState } from "react";
 import { EventAction, EventState, TEvent } from "./types";
 import Event from "./Event";
 import EventForm from "./EventForm";
@@ -7,7 +7,7 @@ import moment from "moment-timezone";
 
 const initialState = { events: [], selectedEvent: null };
 
-const reducer = (state: EventState, action: EventAction): EventState => {
+const reducer = (state: EventState, action: EventAction) => {
   switch (action.type) {
     case "ADD_EVENT":
       return { ...state, events: [...state.events, action.payload] };
@@ -66,36 +66,58 @@ const Calendar = () => {
     setEnd("");
   };
 
-  const handleHourClick = (hour: number) => {
+  const handleHourClick = useCallback((hour: number) => {
     setStart(hour);
-  };
+  }, []);
 
-  const getOverlappingEvents = (start: number, end: number) => {
-    return state.events.filter(
-      (event) => event.start < end && event.end > start
-    );
-  };
-
-  const renderEvents = (i: number) => {
-    return state.events.map((event) => {
-      if (event.start !== i) return null;
-
-      const overlappingEvents = getOverlappingEvents(event.start, event.end);
-      const total = overlappingEvents.length;
-      const offset = overlappingEvents.findIndex((e) => e.id === event.id);
-
-      return (
-        <div key={event.id}>
-          <Event
-            event={event}
-            offset={offset}
-            total={total}
-            onClick={() => dispatch({ type: "SELECT_EVENT", payload: event })}
-          />
-        </div>
+  const getOverlappingEvents = useCallback(
+    (start: number, end: number) => {
+      return state.events.filter(
+        (event) => event.start < end && event.end > start
       );
-    });
-  };
+    },
+    [state.events]
+  );
+
+  const renderEvents = useCallback(
+    (i: number) => {
+      return state.events.map((event) => {
+        if (event.start !== i) return null;
+
+        const overlappingEvents = getOverlappingEvents(event.start, event.end);
+        const total = overlappingEvents.length;
+        const offset = overlappingEvents.findIndex((e) => e.id === event.id);
+
+        return (
+          <div key={event.id}>
+            <Event
+              event={event}
+              offset={offset}
+              total={total}
+              onClick={() => dispatch({ type: "SELECT_EVENT", payload: event })}
+            />
+          </div>
+        );
+      });
+    },
+    [getOverlappingEvents, state.events, dispatch]
+  );
+
+  const hours = useMemo(() => {
+    return [...Array(24)].map((_, i) => (
+      <div className="flex h-10 relative" key={i}>
+        <div
+          className="flex w-24 text-right pr-5 box-border cursor-pointer"
+          onClick={() => handleHourClick(i)}
+        >
+          {moment(i, "HH").format("hh:mm a")}
+        </div>
+        <div className="flex-1 box-border relative left-[0] after:absolute after:top-0 after:left-[-10px] after:h-[0.5px] after:bg-gray-200 after:--tw-content-[''] after:w-[calc(100%+10px)] after:block">
+          {renderEvents(i)}
+        </div>
+      </div>
+    ));
+  }, [handleHourClick, renderEvents]);
 
   return (
     <div>
@@ -113,21 +135,7 @@ const Calendar = () => {
         name={name}
         setName={setName}
       />
-      <div className="flex flex-col	min-w-full">
-        {[...Array(24)].map((_, i) => (
-          <div className="flex h-10 relative" key={i}>
-            <div
-              className="flex w-24 text-right pr-5 box-border cursor-pointer"
-              onClick={() => handleHourClick(i)}
-            >
-              {moment(i, "HH").format("hh:mm a")}
-            </div>
-            <div className="flex-1 box-border relative left-[0] after:absolute after:top-0 after:left-[-10px] after:h-[0.5px] after:bg-gray-200 after:--tw-content-[''] after:w-[calc(100%+10px)] after:block">
-              {renderEvents(i)}
-            </div>
-          </div>
-        ))}
-      </div>
+      <div className="flex flex-col	min-w-full">{hours}</div>
     </div>
   );
 };
