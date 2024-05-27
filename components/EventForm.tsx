@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { EventFormProps } from "./types";
-import { Select, MenuItem, TextField, InputLabel } from "@mui/material";
+import { Select, MenuItem, TextField, InputLabel, Alert } from "@mui/material";
+import { TimeSelect } from "./TimeSelect";
 const EventForm = ({
   selectedEvent,
   onAdd,
@@ -14,8 +15,13 @@ const EventForm = ({
   name,
   setName,
 }: EventFormProps) => {
-  const [nameError, setNameError] = useState("");
-  const [timeError, setTimeError] = useState("");
+  const [errors, setErrors] = useState<{
+    nameError: string;
+    timeError: string;
+  }>({
+    nameError: "",
+    timeError: "",
+  });
 
   useEffect(() => {
     if (selectedEvent) {
@@ -30,17 +36,20 @@ const EventForm = ({
   }, [selectedEvent, setStart, setEnd, setName]);
 
   const isValid = () => {
-    setNameError("");
-    setTimeError("");
+    const newErrors = { nameError: "", timeError: "" };
+    let valid = true;
+
     if (name === "") {
-      setNameError("An event name is required");
-      return false;
+      newErrors.nameError = "An event name is required";
+      valid = false;
     }
     if (start >= end) {
-      setTimeError("Start time must be before end time");
-      return false;
+      newErrors.timeError = "Start time must be before end time";
+      valid = false;
     }
-    return true;
+
+    setErrors(newErrors);
+    return valid;
   };
 
   const handleSubmit = () => {
@@ -74,72 +83,20 @@ const EventForm = ({
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
-      <InputLabel id="start-select-label">Start Time</InputLabel>
-      <Select
+      <TimeSelect
+        change={setStart}
         value={start}
-        onChange={(e) => setStart(e.target.value)}
-        className="max-w-[250px] w-full mb-5 bg-white text-gray-900 text-sm rounded-lg block border-none"
         label="Start Time"
         labelId="start-select-label"
-      >
-        <MenuItem value={0}>12:00 AM</MenuItem>
-        <MenuItem value={1}>1:00 AM</MenuItem>
-        <MenuItem value={2}>2:00 AM</MenuItem>
-        <MenuItem value={3}>3:00 AM</MenuItem>
-        <MenuItem value={4}>4:00 AM</MenuItem>
-        <MenuItem value={5}>5:00 AM</MenuItem>
-        <MenuItem value={6}>6:00 AM</MenuItem>
-        <MenuItem value={7}>7:00 AM</MenuItem>
-        <MenuItem value={8}>8:00 AM</MenuItem>
-        <MenuItem value={9}>9:00 AM</MenuItem>
-        <MenuItem value={10}>10:00 AM</MenuItem>
-        <MenuItem value={11}>11:00 AM</MenuItem>
-        <MenuItem value={12}>12:00 PM</MenuItem>
-        <MenuItem value={13}>1:00 PM</MenuItem>
-        <MenuItem value={14}>2:00 PM</MenuItem>
-        <MenuItem value={15}>3:00 PM</MenuItem>
-        <MenuItem value={16}>4:00 PM</MenuItem>
-        <MenuItem value={17}>5:00 PM</MenuItem>
-        <MenuItem value={18}>6:00 PM</MenuItem>
-        <MenuItem value={19}>7:00 PM</MenuItem>
-        <MenuItem value={20}>8:00 PM</MenuItem>
-        <MenuItem value={21}>9:00 PM</MenuItem>
-        <MenuItem value={22}>10:00 PM</MenuItem>
-        <MenuItem value={23}>11:00 PM</MenuItem>
-      </Select>
+      />
 
-      <InputLabel id="end-select-label">End Time</InputLabel>
-      <Select
+      <TimeSelect
+        change={setEnd}
         value={end}
-        onChange={(e) => setEnd(e.target.value)}
-        className="max-w-[250px] mb-1 w-full bg-white text-gray-900 text-sm rounded-lg block border-none"
+        label="End Time"
         labelId="end-select-label"
-      >
-        <MenuItem value={0}>12:00 AM</MenuItem>
-        <MenuItem value={1}>1:00 AM</MenuItem>
-        <MenuItem value={2}>2:00 AM</MenuItem>
-        <MenuItem value={3}>3:00 AM</MenuItem>
-        <MenuItem value={4}>4:00 AM</MenuItem>
-        <MenuItem value={5}>5:00 AM</MenuItem>
-        <MenuItem value={6}>6:00 AM</MenuItem>
-        <MenuItem value={7}>7:00 AM</MenuItem>
-        <MenuItem value={8}>8:00 AM</MenuItem>
-        <MenuItem value={9}>9:00 AM</MenuItem>
-        <MenuItem value={10}>10:00 AM</MenuItem>
-        <MenuItem value={11}>11:00 AM</MenuItem>
-        <MenuItem value={12}>12:00 PM</MenuItem>
-        <MenuItem value={13}>1:00 PM</MenuItem>
-        <MenuItem value={14}>2:00 PM</MenuItem>
-        <MenuItem value={15}>3:00 PM</MenuItem>
-        <MenuItem value={16}>4:00 PM</MenuItem>
-        <MenuItem value={17}>5:00 PM</MenuItem>
-        <MenuItem value={18}>6:00 PM</MenuItem>
-        <MenuItem value={19}>7:00 PM</MenuItem>
-        <MenuItem value={20}>8:00 PM</MenuItem>
-        <MenuItem value={21}>9:00 PM</MenuItem>
-        <MenuItem value={22}>10:00 PM</MenuItem>
-        <MenuItem value={23}>11:00 PM</MenuItem>
-      </Select>
+      />
+
       <button
         className="m-1 bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
         onClick={handleSubmit}
@@ -162,16 +119,12 @@ const EventForm = ({
           </button>
         </>
       )}
-      {nameError || timeError ? (
-        <div
-          className="m-1 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-          role="alert"
-        >
-          <strong className="font-bold text-sm mr-2">Error!</strong>
-          <span className="block sm:inline text-sm">{nameError}</span>
-          <span className="block sm:inline text-sm">{timeError}</span>
-        </div>
-      ) : null}
+      {(errors.nameError || errors.timeError) && (
+        <Alert severity="error" className="mt-2">
+          {errors.nameError && <div>{errors.nameError}</div>}
+          {errors.timeError && <div>{errors.timeError}</div>}
+        </Alert>
+      )}
     </div>
   );
 };
