@@ -38,6 +38,7 @@ const Calendar = () => {
   const [end, setEnd] = useState<number | string>("");
   const [name, setName] = useState<string>("");
 
+  // Function to handle adding a new event
   const addEvent = (newEvent: TEvent) => {
     // Would probably use tanstack query here and do something like this. and use react-hot-toast for error messages?
     // const {
@@ -51,14 +52,17 @@ const Calendar = () => {
     dispatch({ type: "ADD_EVENT", payload: newEvent });
   };
 
+  // Function to handle updating an existing event
   const updateEvent = (updatedEvent: TEvent) => {
     dispatch({ type: "UPDATE_EVENT", payload: updatedEvent });
   };
 
+  // Function to handle deleting an event
   const deleteEvent = (eventId: number) => {
     dispatch({ type: "DELETE_EVENT", payload: eventId });
   };
 
+  // Clears the selected event
   const clearEvent = () => {
     dispatch({ type: "CLEAR_EVENT" });
     setName("");
@@ -66,10 +70,12 @@ const Calendar = () => {
     setEnd("");
   };
 
+  // Handles clicking on an hour to set the start time
   const handleHourClick = useCallback((hour: number) => {
     setStart(hour);
   }, []);
 
+  // Filters overlapping events based on start and end times
   const getOverlappingEvents = useCallback(
     (start: number, end: number) => {
       return state.events.filter(
@@ -79,6 +85,7 @@ const Calendar = () => {
     [state.events]
   );
 
+  // Renders events for each hour
   const renderEvents = useCallback(
     (i: number) => {
       return state.events.map((event) => {
@@ -103,6 +110,7 @@ const Calendar = () => {
     [getOverlappingEvents, state.events, dispatch]
   );
 
+  // Renders the 24-hour grid
   const hours = useMemo(() => {
     return [...Array(24)].map((_, i) => (
       <div className="flex h-10 relative" key={i}>

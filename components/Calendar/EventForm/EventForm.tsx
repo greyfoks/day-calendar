@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { EventFormProps } from "../types";
 import { TextField, Alert } from "@mui/material";
 import { TimeSelect } from "./TimeSelect";
+import { Button } from "./Button";
 const EventForm = ({
   selectedEvent,
   onAdd,
@@ -16,10 +17,10 @@ const EventForm = ({
   setName,
 }: EventFormProps) => {
   const [errors, setErrors] = useState<{
-    nameError: string;
+    emptyFieldError: string;
     timeError: string;
   }>({
-    nameError: "",
+    emptyFieldError: "",
     timeError: "",
   });
 
@@ -36,11 +37,11 @@ const EventForm = ({
   }, [selectedEvent, setStart, setEnd, setName]);
 
   const isValid = () => {
-    const newErrors = { nameError: "", timeError: "" };
+    const newErrors = { emptyFieldError: "", timeError: "" };
     let valid = true;
 
-    if (name === "") {
-      newErrors.nameError = "An event name is required";
+    if (name === "" || !start || !end) {
+      newErrors.emptyFieldError = "All fields are required";
       valid = false;
     }
     if (start >= end) {
@@ -97,31 +98,19 @@ const EventForm = ({
         labelId="end-select-label"
       />
 
-      <button
-        className="m-1 bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
-        onClick={handleSubmit}
-      >
-        {selectedEvent === null ? "Add Event" : "Update Event"}
-      </button>
+      <Button
+        click={handleSubmit}
+        value={selectedEvent === null ? "Add Event" : "Update Event"}
+      />
       {selectedEvent && (
         <>
-          <button
-            className="m-1 bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
-            onClick={handleDelete}
-          >
-            Delete Event
-          </button>
-          <button
-            className="m-1 bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-400 rounded shadow"
-            onClick={onClear}
-          >
-            Clear
-          </button>
+          <Button click={handleDelete} value={"Delete Event"} />
+          <Button click={onClear} value={"Clear"} />
         </>
       )}
-      {(errors.nameError || errors.timeError) && (
+      {(errors.emptyFieldError || errors.timeError) && (
         <Alert severity="error" className="mt-2">
-          {errors.nameError && <div>{errors.nameError}</div>}
+          {errors.emptyFieldError && <div>{errors.emptyFieldError}</div>}
           {errors.timeError && <div>{errors.timeError}</div>}
         </Alert>
       )}
