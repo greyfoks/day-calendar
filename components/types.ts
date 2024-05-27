@@ -28,3 +28,15 @@ export type EventProps = {
   total: number;
   offset: number;
 };
+
+export type EventState = {
+  events: TEvent[];
+  selectedEvent: TEvent | null;
+};
+
+export type EventAction =
+  | { type: "ADD_EVENT"; payload: TEvent }
+  | { type: "UPDATE_EVENT"; payload: TEvent }
+  | { type: "DELETE_EVENT"; payload: number }
+  | { type: "SELECT_EVENT"; payload: TEvent }
+  | { type: "CLEAR_EVENT" };

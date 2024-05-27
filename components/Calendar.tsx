@@ -1,18 +1,44 @@
 "use client";
-import React, { useState } from "react";
-import { TEvent } from "./types";
+import React, { useReducer, useState } from "react";
+import { EventAction, EventState, TEvent } from "./types";
 import Event from "./Event";
 import EventForm from "./EventForm";
 import moment from "moment-timezone";
 
+const initialState = { events: [], selectedEvent: null };
+
+const reducer = (state: EventState, action: EventAction): EventState => {
+  switch (action.type) {
+    case "ADD_EVENT":
+      return { ...state, events: [...state.events, action.payload] };
+    case "UPDATE_EVENT":
+      return {
+        ...state,
+        events: state.events.map((event) =>
+          event.id === action.payload.id ? action.payload : event
+        ),
+      };
+    case "DELETE_EVENT":
+      return {
+        ...state,
+        events: state.events.filter((event) => event.id !== action.payload),
+      };
+    case "SELECT_EVENT":
+      return { ...state, selectedEvent: action.payload };
+    case "CLEAR_EVENT":
+      return { ...state, selectedEvent: null };
+    default:
+      return state;
+  }
+};
+
 const Calendar = () => {
-  const [events, setEvents] = useState<TEvent[]>([]);
-  const [selectedEvent, setSelectedEvent] = useState<TEvent | null>(null);
+  const [state, dispatch] = useReducer(reducer, initialState);
   const [start, setStart] = useState<number | string>("");
   const [end, setEnd] = useState<number | string>("");
   const [name, setName] = useState<string>("");
 
-  const addEvent = (event: TEvent) => {
+  const addEvent = (newEvent: TEvent) => {
     // Would probably use tanstack query here and do something like this. and use react-hot-toast for error messages?
     // const {
     //   mutate,
@@ -22,23 +48,19 @@ const Calendar = () => {
     //   mutationFn: async (event) => {
     //   },
     // });
-    setEvents([...events, event]);
+    dispatch({ type: "ADD_EVENT", payload: newEvent });
   };
 
   const updateEvent = (updatedEvent: TEvent) => {
-    setEvents(
-      events.map((event) =>
-        event.id === updatedEvent.id ? updatedEvent : event
-      )
-    );
+    dispatch({ type: "UPDATE_EVENT", payload: updatedEvent });
   };
 
   const deleteEvent = (eventId: number) => {
-    setEvents(events.filter((event) => event.id !== eventId));
+    dispatch({ type: "DELETE_EVENT", payload: eventId });
   };
 
   const clearEvent = () => {
-    setSelectedEvent(null);
+    dispatch({ type: "CLEAR_EVENT" });
     setName("");
     setStart("");
     setEnd("");
@@ -49,11 +71,13 @@ const Calendar = () => {
   };
 
   const getOverlappingEvents = (start: number, end: number) => {
-    return events.filter((event) => event.start < end && event.end > start);
+    return state.events.filter(
+      (event) => event.start < end && event.end > start
+    );
   };
 
   const renderEvents = (i: number) => {
-    return events.map((event) => {
+    return state.events.map((event) => {
       if (event.start !== i) return null;
 
       const overlappingEvents = getOverlappingEvents(event.start, event.end);
@@ -66,7 +90,7 @@ const Calendar = () => {
             event={event}
             offset={offset}
             total={total}
-            onClick={() => setSelectedEvent(event)}
+            onClick={() => dispatch({ type: "SELECT_EVENT", payload: event })}
           />
         </div>
       );
@@ -77,7 +101,7 @@ const Calendar = () => {
     <div>
       <h1 className="mb-5">{moment().format("LL")}</h1>
       <EventForm
-        selectedEvent={selectedEvent}
+        selectedEvent={state.selectedEvent}
         onAdd={addEvent}
         onUpdate={updateEvent}
         onDelete={deleteEvent}
