@@ -1,8 +1,8 @@
 "use client";
 import React, { useCallback, useMemo, useReducer, useState } from "react";
 import { EventAction, EventState, TEvent } from "./types";
-import Event from "./Event";
-import EventForm from "./EventForm";
+import Event from "./Event/Event";
+import EventForm from "./EventForm/EventForm";
 import moment from "moment-timezone";
 
 const initialState = { events: [], selectedEvent: null };

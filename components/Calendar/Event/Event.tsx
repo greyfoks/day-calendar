@@ -1,5 +1,5 @@
 import React from "react";
-import { EventProps } from "./types";
+import { EventProps } from "../types";
 import moment from "moment";
 
 const Event = ({ event, onClick, total, offset }: EventProps) => {

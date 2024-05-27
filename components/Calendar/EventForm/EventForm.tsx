@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { EventFormProps } from "./types";
-import { Select, MenuItem, TextField, InputLabel, Alert } from "@mui/material";
+import { EventFormProps } from "../types";
+import { TextField, Alert } from "@mui/material";
 import { TimeSelect } from "./TimeSelect";
 const EventForm = ({
   selectedEvent,
