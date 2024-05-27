@@ -4,7 +4,6 @@ import { Dispatch, SetStateAction } from "react";
 export type TEvent = {
   id: number;
   name: string;
-  // If I had connected to backed end would of used real datetimes but for time saving did it this way.
   start: string;
   end: string;
 };
