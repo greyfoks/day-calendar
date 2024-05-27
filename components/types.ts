@@ -21,3 +21,10 @@ export type EventFormProps = {
   name: string;
   setName: Dispatch<SetStateAction<string>>;
 };
+
+export type EventProps = {
+  event: TEvent;
+  onClick: () => void;
+  total: number;
+  offset: number;
+};
