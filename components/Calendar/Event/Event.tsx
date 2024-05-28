@@ -1,6 +1,6 @@
 import React from "react";
 import { EventProps } from "../types";
-import moment from "moment";
+import moment from "moment-timezone";
 
 const Event = ({ event, onClick, total, offset }: EventProps) => {
   const eventStartFormat = moment(event.start).hour();

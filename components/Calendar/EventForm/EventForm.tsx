@@ -3,7 +3,7 @@ import { EventFormProps } from "../types";
 import { TextField, Alert } from "@mui/material";
 import { TimeSelect } from "./TimeSelect";
 import { Button } from "./Button";
-import moment from "moment";
+import moment from "moment-timezone";
 const EventForm = ({
   selectedEvent,
   onAdd,
