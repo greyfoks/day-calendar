@@ -140,11 +140,12 @@ const Calendar = () => {
   // Renders the 24-hour grid
   const hours = useMemo(() => {
     return [...Array(24)].map((_, i) => (
-      <div className="flex h-10 relative" key={i}>
-        <div
-          className="flex w-24 text-right pr-5 box-border cursor-pointer"
-          onClick={() => handleHourClick(i)}
-        >
+      <div
+        className="flex h-10 relative cursor-pointer"
+        key={i}
+        onClick={() => handleHourClick(i)}
+      >
+        <div className="flex w-24 text-right pr-5 box-border">
           {moment(i, "HH").format("hh:mm a")}
         </div>
         <div className="flex-1 box-border relative left-[0] after:absolute after:top-0 after:left-[-10px] after:h-[0.5px] after:bg-gray-200 after:--tw-content-[''] after:w-[calc(100%+10px)] after:block">
